@@ -97,13 +97,23 @@ const deleteAssignment = (req, res) => {
 };
 
 // Get assignments
+const { users } = require('../models/store');
+
 const getAssignments = (req, res) => {
+  const assignmentsWithTeacher = assignments.map(a => {
+    const teacher = users.find(u => u.id === a.teacherId);
+    return {
+      ...a,
+      teacherName: teacher ? teacher.name : 'Unknown Teacher'
+    };
+  });
+
   if (req.user.role === 'teacher') {
     // Teachers see all their assignments
-    return res.json(assignments);
+    return res.json(assignmentsWithTeacher);
   } else {
     // Students only see published assignments
-    const publishedAssignments = assignments.filter(a => a.status === 'Published' || a.status === 'Completed');
+    const publishedAssignments = assignmentsWithTeacher.filter(a => a.status === 'Published' || a.status === 'Completed');
     return res.json(publishedAssignments);
   }
 };

@@ -7,7 +7,8 @@ const users = [
     email: 'teacher@tailwebs.com',
     password: 'password',
     role: 'teacher',
-    name: 'Teacher User'
+    name: 'Teacher User',
+    subject: 'Maths'
   },
   {
     id: 2,

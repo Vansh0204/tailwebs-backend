@@ -20,7 +20,8 @@ const login = async (req, res) => {
     const payload = {
       id: user.id,
       role: user.role,
-      name: user.name
+      name: user.name,
+      subject: user.subject
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret', {
@@ -33,7 +34,8 @@ const login = async (req, res) => {
         id: user.id,
         role: user.role,
         name: user.name,
-        email: user.email
+        email: user.email,
+        subject: user.subject
       }
     });
   } catch (err) {
@@ -43,11 +45,15 @@ const login = async (req, res) => {
 };
 
 const signup = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, subject } = req.body;
 
   try {
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    if (role === 'teacher' && !subject) {
+      return res.status(400).json({ message: 'Subject is required for teachers' });
     }
 
     const existingUser = users.find(u => u.email === email);
@@ -62,7 +68,8 @@ const signup = async (req, res) => {
       name,
       email,
       password, // In a real app, hash this with bcrypt
-      role
+      role,
+      subject: role === 'teacher' ? subject : null
     };
 
     users.push(newUser);
@@ -73,7 +80,8 @@ const signup = async (req, res) => {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
-        role: newUser.role
+        role: newUser.role,
+        subject: newUser.subject
       }
     });
   } catch (err) {
@@ -82,4 +90,33 @@ const signup = async (req, res) => {
   }
 };
 
-module.exports = { login, signup };
+const updateProfile = async (req, res) => {
+  const { name, subject } = req.body;
+  const userId = req.user.id;
+
+  try {
+    const user = users.find(u => u.id === userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (name) user.name = name;
+    if (subject && user.role === 'teacher') user.subject = subject;
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        subject: user.subject
+      }
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+module.exports = { login, signup, updateProfile };

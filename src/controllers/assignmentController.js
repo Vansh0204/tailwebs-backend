@@ -8,6 +8,11 @@ const createAssignment = (req, res) => {
     return res.status(400).json({ message: 'Title, description, and due date are required' });
   }
 
+  // Get teacher's subject
+  const { users } = require('../models/store');
+  const teacher = users.find(u => u.id === req.user.id);
+  const teacherSubject = teacher ? teacher.subject : null;
+
   const newAssignment = {
     id: assignments.length + 1,
     title,
@@ -15,6 +20,7 @@ const createAssignment = (req, res) => {
     dueDate,
     status: 'Draft',
     teacherId: req.user.id,
+    subject: teacherSubject, // Inherit teacher's subject
     createdAt: new Date().toISOString()
   };
 
@@ -100,6 +106,8 @@ const deleteAssignment = (req, res) => {
 const { users } = require('../models/store');
 
 const getAssignments = (req, res) => {
+  const currentUser = users.find(u => u.id === req.user.id);
+  
   const assignmentsWithTeacher = assignments.map(a => {
     const teacher = users.find(u => u.id === a.teacherId);
     return {
@@ -109,8 +117,11 @@ const getAssignments = (req, res) => {
   });
 
   if (req.user.role === 'teacher') {
-    // Teachers see all their assignments
-    return res.json(assignmentsWithTeacher);
+    // Teachers see their OWN assignments OR those with the same SUBJECT
+    const sharedAssignments = assignmentsWithTeacher.filter(a => 
+      a.teacherId === req.user.id || (a.subject && a.subject === currentUser.subject)
+    );
+    return res.json(sharedAssignments);
   } else {
     // Students only see published assignments
     const publishedAssignments = assignmentsWithTeacher.filter(a => a.status === 'Published' || a.status === 'Completed');

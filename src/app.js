@@ -7,12 +7,17 @@ const submissionRoutes = require('./routes/submissionRoutes');
 
 const app = express();
 
-// Middleware
+// 1. CORS MUST be the first middleware
 app.use(cors({
-  origin: '*', // Allow all origins for production demo
+  origin: true, // Reflects the request origin
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// 2. Explicitly handle preflight for all routes
+app.options('*', cors());
+
 app.use(morgan('dev'));
 app.use(express.json());
 

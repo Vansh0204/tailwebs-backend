@@ -28,10 +28,10 @@ app.use((req, res, next) => {
 const statusHandler = (req, res) => {
   res.json({ 
     status: 'Ready',
-    version: '2.7 (CORS Override Active)',
+    version: '2.8 (Profile API Active)',
     userCount: users.length,
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'production'
+    endpoints: ['/api/auth/profile [PUT]', '/api/subjects [GET/POST]']
   });
 };
 

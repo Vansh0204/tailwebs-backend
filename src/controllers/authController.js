@@ -10,10 +10,8 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Since I used a hardcoded hashed password in store.js, I'll bypass bcrypt for this simple exercise
-    // In a real app, I'd use bcrypt.compare(password, user.password)
-    // For now, let's just use a simple match for ease of testing "password"
-    if (password !== 'password') {
+    // For now, let's just use a simple match for the assessment portal
+    if (password !== user.password) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 

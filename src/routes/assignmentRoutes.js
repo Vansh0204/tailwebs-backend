@@ -23,6 +23,7 @@ router.get('/:id', getAssignmentById);
 router.post('/', checkRole('teacher'), createAssignment);
 router.put('/:id', checkRole('teacher'), updateAssignment);
 router.patch('/:id/status', checkRole('teacher'), updateStatus);
+router.put('/:id/status', checkRole('teacher'), updateStatus); // Fallback to PUT
 router.delete('/:id', checkRole('teacher'), deleteAssignment);
 
 module.exports = router;

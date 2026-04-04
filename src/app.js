@@ -8,11 +8,26 @@ const { users } = require('./models/store');
 
 const app = express();
 
-// 1. Health/Status Check (Base URL)
+// 1. Manual CORS Preflight & Header Fix (MUST be at the absolute top)
+app.use((req, res, next) => {
+  const origin = req.headers.origin || '*';
+  res.header('Access-Control-Allow-Origin', origin);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400'); // 24 Hours
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).send();
+  }
+  next();
+});
+
+// 2. Health/Status Check (Base URL)
 const statusHandler = (req, res) => {
   res.json({ 
     status: 'Ready',
-    version: '2.4 (Base Status Fix)',
+    version: '2.7 (CORS Override Active)',
     userCount: users.length,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'production'
@@ -23,30 +38,13 @@ app.get('/', statusHandler);
 app.get('/status', statusHandler);
 app.get('/api/status', statusHandler);
 
-// 2. CORS MUST be the first middleware
-app.use(cors({
-  origin: true,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+// 3. Remove Standard CORS Middleware (Using manual override instead)
+// app.use(cors({ origin: true, credentials: true })); 
 
 app.use(morgan('dev'));
 app.use(express.json());
 
-// Manual CORS Preflight & Header Fix
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400'); // 24 Hours
-
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
+// manual handler moved to top
 
 // Routes
 app.use('/api/auth', authRoutes);

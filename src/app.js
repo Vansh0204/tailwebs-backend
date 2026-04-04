@@ -8,17 +8,22 @@ const { users } = require('./models/store');
 
 const app = express();
 
-// Health Check (Root level, no prefix)
-app.get('/status', (req, res) => {
+// 1. Health/Status Check (Base URL)
+const statusHandler = (req, res) => {
   res.json({ 
     status: 'Ready',
-    version: '2.3 (Root Status Fix)',
+    version: '2.4 (Base Status Fix)',
     userCount: users.length,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'production'
   });
-});
+};
 
-// 1. CORS MUST be the first middleware
+app.get('/', statusHandler);
+app.get('/status', statusHandler);
+app.get('/api/status', statusHandler);
+
+// 2. CORS MUST be the first middleware
 app.use(cors({
   origin: true,
   credentials: true,
@@ -33,11 +38,6 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/submissions', submissionRoutes);
-
-// Base Route
-app.get('/', (req, res) => {
-  res.send('Assignment Workflow API is running...');
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {

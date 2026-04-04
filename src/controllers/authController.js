@@ -7,12 +7,14 @@ const login = async (req, res) => {
   try {
     const user = users.find(u => u.email === email);
     if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      console.log(`Login failed: Email ${email} not found.`);
+      return res.status(400).json({ message: 'User with this email does not exist. Please sign up first.' });
     }
 
     // For now, let's just use a simple match for the assessment portal
     if (password !== user.password) {
-      return res.status(400).json({ message: 'Invalid credentials' });
+      console.log(`Login failed: Incorrect password for ${email}.`);
+      return res.status(400).json({ message: 'Incorrect password. Please try again.' });
     }
 
     const payload = {
@@ -50,9 +52,11 @@ const signup = async (req, res) => {
 
     const existingUser = users.find(u => u.email === email);
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      console.log(`Signup failed: User ${email} already exists.`);
+      return res.status(400).json({ message: 'A user with this email already exists.' });
     }
 
+    console.log(`Creating new user: ${email} (${role})`);
     const newUser = {
       id: users.length + 1,
       name,

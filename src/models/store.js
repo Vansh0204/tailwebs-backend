@@ -21,9 +21,11 @@ const users = [
 
 const assignments = [];
 const submissions = [];
+const subjects = ['Maths', 'Science', 'English', 'History', 'Art'];
 
 module.exports = {
   users,
   assignments,
-  submissions
+  submissions,
+  subjects
 };

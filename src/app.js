@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
+const subjectRoutes = require('./routes/subjectRoutes');
 const { users } = require('./models/store');
 
 const app = express();
@@ -50,6 +51,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/submissions', submissionRoutes);
+app.use('/api/subjects', subjectRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

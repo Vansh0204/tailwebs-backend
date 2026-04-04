@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
+const { users } = require('./models/store');
 
 const app = express();
 
@@ -26,6 +27,16 @@ app.use('/api/submissions', submissionRoutes);
 // Base Route
 app.get('/', (req, res) => {
   res.send('Assignment Workflow API is running...');
+});
+
+// Health/Status Check
+app.get('/api/auth/status', (req, res) => {
+  res.json({ 
+    status: 'Ready',
+    version: '2.1 (Detailed Errors)',
+    userCount: users.length,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Error handling middleware

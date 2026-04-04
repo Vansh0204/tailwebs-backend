@@ -19,6 +19,16 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(express.json());
 
+// Health/Status Check
+app.get('/api/status', (req, res) => {
+  res.json({ 
+    status: 'Ready',
+    version: '2.2 (CORS + Status Fix)',
+    userCount: users.length,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/assignments', assignmentRoutes);
@@ -27,16 +37,6 @@ app.use('/api/submissions', submissionRoutes);
 // Base Route
 app.get('/', (req, res) => {
   res.send('Assignment Workflow API is running...');
-});
-
-// Health/Status Check
-app.get('/api/auth/status', (req, res) => {
-  res.json({ 
-    status: 'Ready',
-    version: '2.1 (Detailed Errors)',
-    userCount: users.length,
-    timestamp: new Date().toISOString()
-  });
 });
 
 // Error handling middleware

@@ -8,9 +8,19 @@ const { users } = require('./models/store');
 
 const app = express();
 
+// Health Check (Root level, no prefix)
+app.get('/status', (req, res) => {
+  res.json({ 
+    status: 'Ready',
+    version: '2.3 (Root Status Fix)',
+    userCount: users.length,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // 1. CORS MUST be the first middleware
 app.use(cors({
-  origin: true, // Reflects the request origin
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -18,16 +28,6 @@ app.use(cors({
 
 app.use(morgan('dev'));
 app.use(express.json());
-
-// Health/Status Check
-app.get('/api/status', (req, res) => {
-  res.json({ 
-    status: 'Ready',
-    version: '2.2 (CORS + Status Fix)',
-    userCount: users.length,
-    timestamp: new Date().toISOString()
-  });
-});
 
 // Routes
 app.use('/api/auth', authRoutes);

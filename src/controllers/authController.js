@@ -94,10 +94,14 @@ const updateProfile = async (req, res) => {
   const { name, subject } = req.body;
   const userId = req.user.id;
 
+  console.log(`[DEBUG] Profile Update Attempt - UserID: ${userId}`);
+  console.log(`[DEBUG] Current Users In Memory:`, users.map(u => ({ id: u.id, email: u.email })));
+
   try {
     const user = users.find(u => u.id === userId);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      console.log(`[DEBUG] 404 Error: User with ID ${userId} not found in memory.`);
+      return res.status(404).json({ message: 'User not found in current server memory. Please re-login.' });
     }
 
     if (name) user.name = name;

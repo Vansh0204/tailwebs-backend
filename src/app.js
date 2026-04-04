@@ -15,9 +15,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// 2. Explicitly handle preflight for all routes
-app.options('*', cors());
-
 app.use(morgan('dev'));
 app.use(express.json());
 

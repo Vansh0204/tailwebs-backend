@@ -157,21 +157,25 @@ const getAssignments = (req, res) => {
   };
 
   // 4. Pagination Logic
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
+  const page = parseInt(req.query.page);
+  const limit = parseInt(req.query.limit);
 
-  const paginatedResults = filteredAssignments.slice(startIndex, endIndex);
+  // If page/limit are provided, use them. Otherwise, return the FULL list for the new "Dual-View" frontend.
+  let results = filteredAssignments;
+  if (page && limit) {
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    results = filteredAssignments.slice(startIndex, endIndex);
+  }
 
   res.json({
-    assignments: paginatedResults,
+    assignments: results,
     meta,
     pagination: {
-      currentPage: page,
-      totalPages: Math.ceil(filteredAssignments.length / limit),
+      currentPage: page || 1,
+      totalPages: limit ? Math.ceil(filteredAssignments.length / limit) : 1,
       totalItems: filteredAssignments.length,
-      limit
+      limit: limit || filteredAssignments.length
     }
   });
 };

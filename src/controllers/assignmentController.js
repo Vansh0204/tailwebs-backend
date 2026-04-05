@@ -156,26 +156,15 @@ const getAssignments = (req, res) => {
     totalSubmissions: filteredAssignments.reduce((acc, curr) => acc + (curr.submissionCount || 0), 0)
   };
 
-  // 4. Pagination Logic
-  const page = parseInt(req.query.page);
-  const limit = parseInt(req.query.limit);
-
-  // If page/limit are provided, use them. Otherwise, return the FULL list for the new "Dual-View" frontend.
-  let results = filteredAssignments;
-  if (page && limit) {
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-    results = filteredAssignments.slice(startIndex, endIndex);
-  }
-
+  // 4. Return Full Results (No Slicing)
   res.json({
-    assignments: results,
+    assignments: filteredAssignments,
     meta,
     pagination: {
-      currentPage: page || 1,
-      totalPages: limit ? Math.ceil(filteredAssignments.length / limit) : 1,
+      currentPage: 1,
+      totalPages: 1,
       totalItems: filteredAssignments.length,
-      limit: limit || filteredAssignments.length
+      limit: filteredAssignments.length
     }
   });
 };

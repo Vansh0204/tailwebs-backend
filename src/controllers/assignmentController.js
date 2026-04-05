@@ -110,12 +110,17 @@ const deleteAssignment = (req, res) => {
 const { users } = require('../models/store');
 
 const getAssignments = (req, res) => {
-  const { users } = require('../models/store'); // Always get freshest reference
+  const { users, assignments, submissions } = require('../models/store'); // Always get freshest reference
   const currentUser = users.find(u => u.id === req.user.id);
   
+  // 1. Calculate submissions per assignment for analytics
   const assignmentsWithTeacher = assignments.map(a => {
     const teacher = users.find(u => u.id === a.teacherId);
     
+    // Count submissions for this assignment
+    const assignmentSubmissions = submissions.filter(s => s.assignmentId === a.id);
+    const submissionCount = assignmentSubmissions.length;
+
     // Fallback logic: If teacher missing (due to restart), check if it belongs to current requester
     let teacherName = 'Unknown Teacher';
     if (teacher) {
@@ -126,21 +131,49 @@ const getAssignments = (req, res) => {
 
     return {
       ...a,
-      teacherName
+      teacherName,
+      submissionCount
     };
   });
 
+  // 2. Filter based on role
+  let filteredAssignments = [];
   if (req.user.role === 'teacher') {
     // Teachers see their OWN assignments OR those with the same SUBJECT
-    const sharedAssignments = assignmentsWithTeacher.filter(a => 
+    filteredAssignments = assignmentsWithTeacher.filter(a => 
       a.teacherId === req.user.id || (a.subject && a.subject === currentUser.subject)
     );
-    return res.json(sharedAssignments);
   } else {
     // Students only see published assignments
-    const publishedAssignments = assignmentsWithTeacher.filter(a => a.status === 'Published' || a.status === 'Completed');
-    return res.json(publishedAssignments);
+    filteredAssignments = assignmentsWithTeacher.filter(a => a.status === 'Published' || a.status === 'Completed');
   }
+
+  // 3. Analytics Meta (for dashboard cards)
+  const meta = {
+    total: filteredAssignments.length,
+    published: filteredAssignments.filter(a => a.status === 'Published').length,
+    drafts: filteredAssignments.filter(a => a.status === 'Draft').length,
+    totalSubmissions: filteredAssignments.reduce((acc, curr) => acc + (curr.submissionCount || 0), 0)
+  };
+
+  // 4. Pagination Logic
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
+  const paginatedResults = filteredAssignments.slice(startIndex, endIndex);
+
+  res.json({
+    assignments: paginatedResults,
+    meta,
+    pagination: {
+      currentPage: page,
+      totalPages: Math.ceil(filteredAssignments.length / limit),
+      totalItems: filteredAssignments.length,
+      limit
+    }
+  });
 };
 
 // Get single assignment

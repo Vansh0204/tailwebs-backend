@@ -25,6 +25,7 @@ const createAssignment = (req, res) => {
   };
 
   assignments.push(newAssignment);
+  req.app.get('io').emit('assignments-changed');
   res.status(201).json(newAssignment);
 };
 
@@ -52,6 +53,7 @@ const updateAssignment = (req, res) => {
     updatedAt: new Date().toISOString()
   };
 
+  req.app.get('io').emit('assignments-changed');
   res.json(assignments[index]);
 };
 
@@ -82,6 +84,7 @@ const updateStatus = (req, res) => {
     });
   }
 
+  req.app.get('io').emit('assignments-changed');
   res.json(assignments[index]);
 };
 
@@ -99,6 +102,7 @@ const deleteAssignment = (req, res) => {
   }
 
   assignments.splice(index, 1);
+  req.app.get('io').emit('assignments-changed');
   res.json({ message: 'Assignment deleted successfully' });
 };
 

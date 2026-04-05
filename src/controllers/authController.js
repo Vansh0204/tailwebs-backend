@@ -123,4 +123,12 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { login, signup, updateProfile };
+const getMe = async (req, res) => {
+  const user = users.find(u => u.id === req.user.id);
+  if (!user) {
+    return res.status(404).json({ message: 'Session expired' });
+  }
+  res.json(user);
+};
+
+module.exports = { login, signup, updateProfile, getMe };

@@ -106,13 +106,23 @@ const deleteAssignment = (req, res) => {
 const { users } = require('../models/store');
 
 const getAssignments = (req, res) => {
+  const { users } = require('../models/store'); // Always get freshest reference
   const currentUser = users.find(u => u.id === req.user.id);
   
   const assignmentsWithTeacher = assignments.map(a => {
     const teacher = users.find(u => u.id === a.teacherId);
+    
+    // Fallback logic: If teacher missing (due to restart), check if it belongs to current requester
+    let teacherName = 'Unknown Teacher';
+    if (teacher) {
+      teacherName = teacher.name;
+    } else if (a.teacherId === req.user.id) {
+      teacherName = req.user.name;
+    }
+
     return {
       ...a,
-      teacherName: teacher ? teacher.name : 'Unknown Teacher'
+      teacherName
     };
   });
 
